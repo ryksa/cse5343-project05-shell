@@ -189,8 +189,6 @@ int exec_if_elf(char* filename)
 	int fd = open(filename,O_RDONLY | S_IREAD);
 	Elf32_Ehdr *elfH;
 	buff = mmap(NULL,9000, PROT_READ|PROT_EXEC, MAP_SHARED, fd, 0);
-	}
-	else
 	elfH = (Elf32_Ehdr*)buff;
 	if(strcmp(elfH->e_ident+1,"ELF"))
 	{
@@ -201,7 +199,6 @@ int exec_if_elf(char* filename)
 		return 1;
 	}
 	else
-
 	{
 		return 0;
 	}
