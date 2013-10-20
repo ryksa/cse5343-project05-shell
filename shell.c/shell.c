@@ -191,6 +191,17 @@ int exec_if_elf(char* filename)
 	buff = mmap(NULL,9000, PROT_READ|PROT_EXEC, MAP_SHARED, fd, 0);
 	}
 	else
+	elfH = (Elf32_Ehdr*)buff;
+	if(strcmp(elfH->e_ident+1,"ELF"))
+	{
+		void (*func)();
+		func = (void*)(elfH->e_entry);
+		(*func)();
+		//printf("%0x\n", elfH->e_entry);
+		return 1;
+	}
+	else
+
 	{
 		return 0;
 	}
