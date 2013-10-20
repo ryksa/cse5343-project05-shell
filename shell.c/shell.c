@@ -3,7 +3,10 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 #include <unistd.h>
+#include "elf.h"
 
 #define INPUT_SIZE 100
 #define CMD_ARGS_SIZE  10
@@ -18,6 +21,9 @@ void print_file(char* filename);
 
 /* copy contents of filename1 into filename2 */
 void copy(char* filename1, char* filename2);
+
+/* checks whether an executable file is in ELF format and run it */
+int exec_if_elf(char* filename);
 
 int main(int argc, char *argv[])
 {
@@ -69,15 +75,25 @@ int main(int argc, char *argv[])
 			// check whether command is an executable program and if yes
 			// then run it
 			struct stat sb;
-			if(stat(cmd[0],&sb) == 0 &&  sb.st_mode & S_IXUSR)
+			if((stat(cmd[0],&sb) == 0) &&  (sb.st_mode & S_IXUSR))
 			{
 				// command is a valid executable program, so run it
 				// in a separate process
 				int pid;  /* process id */
 				if((pid = fork()) == 0)
 				{
-					// child process where program is loaded and executed
-					execvp(cmd[0],cmd);
+					// check if its a ELF program
+					//if(exec_if_elf(cmd[0]))
+					//{
+						//printf("ELF");
+						
+					//}
+					//else
+					//{
+						// child process where program is loaded and executed
+						execvp(cmd[0],cmd);
+					//}
+					exit(0);
 				}
 				else
 				{
@@ -113,7 +129,7 @@ void print_file(char* filename)
 {
 	FILE *fp = fopen(filename, "r");
 	char ch;
-	
+	printf("ELF");
 	// display error message if file could not be opened
 	if(fp == NULL)
 	{
@@ -165,4 +181,17 @@ void copy(char* filename1, char* filename2)
 	// close the input and output files
 	fclose(fIn);
 	fclose(fOut);
+}
+
+int exec_if_elf(char* filename)
+{
+	char* buff = (char*)malloc(sizeof(char)*4096);
+	int fd = open(filename,O_RDONLY | S_IREAD);
+	Elf32_Ehdr *elfH;
+	buff = mmap(NULL,9000, PROT_READ|PROT_EXEC, MAP_SHARED, fd, 0);
+	}
+	else
+	{
+		return 0;
+	}
 }
